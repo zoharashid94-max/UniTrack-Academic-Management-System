@@ -76,8 +76,7 @@ Before running the project, make sure you have:
 6. Open the application in your browser:
 
    `http://localhost:8080`
-
-*Note: Database configuration must match your local PostgreSQL setup before starting the application.*
+   
 
 ## Database and Academic Records
 
