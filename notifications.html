@@ -1,0 +1,465 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniTrack | Notifications</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #080b18;
+            --panel: #101528;
+            --border: #252c45;
+            --text: #f1f3ff;
+            --muted: #929bb8;
+            --purple: #9272ff;
+            --blue: #55a4ff;
+            --green: #55d6a0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh;
+        }
+
+        a { text-decoration: none; }
+
+        .layout { display: flex; min-height: 100vh; }
+
+        .sidebar {
+            width: 245px;
+            flex-shrink: 0;
+            padding: 28px 17px;
+            background: #0c1020;
+            border-right: 1px solid var(--border);
+        }
+
+        .brand {
+            padding: 0 10px;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            gap: 11px;
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            border-radius: 13px;
+            background: linear-gradient(135deg, #9676ff, #4d91ff);
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .brand-name {
+            font: 700 22px 'Space Grotesk', sans-serif;
+            letter-spacing: -1px;
+        }
+
+        .brand-name span { color: var(--purple); }
+
+        .menu-label {
+            color: #6e7898;
+            font-size: 10px;
+            letter-spacing: 1.8px;
+            font-weight: 700;
+            padding: 0 12px;
+            margin-bottom: 13px;
+        }
+
+        .nav { display: flex; flex-direction: column; gap: 6px; }
+
+        .nav a {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 12px 13px;
+            border-radius: 10px;
+            color: var(--muted);
+            font-size: 13px;
+            transition: .2s;
+        }
+
+        .nav a:hover, .nav a.active {
+            color: white;
+            background: linear-gradient(100deg, #8062ff2a, #558cff0c);
+        }
+
+        .nav a.active { border: 1px solid #9272ff35; }
+
+        .nav-icon { width: 20px; text-align: center; font-size: 17px; }
+
+        .main {
+            flex: 1;
+            min-width: 0;
+            padding: 29px 34px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .breadcrumb { color: var(--muted); font-size: 12px; margin-bottom: 7px; }
+
+        h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; }
+
+        h1 { font-size: clamp(24px, 3vw, 30px); }
+
+        .back-link {
+            color: #c4b7ff;
+            border: 1px solid var(--border);
+            padding: 10px 14px;
+            border-radius: 9px;
+            font-size: 12px;
+        }
+
+        .intro {
+            padding: 24px;
+            margin-bottom: 22px;
+            border: 1px solid #5e57a050;
+            border-radius: 16px;
+            background: radial-gradient(ellipse at 85% 20%, #6556d42c, transparent 42%), linear-gradient(110deg, #171b36, #11172a);
+        }
+
+        .intro h2 { font-size: 19px; margin-bottom: 8px; }
+
+        .intro p {
+            color: #aab3d0;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 22px;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .panel-header h2 { font-size: 16px; }
+
+        .count {
+            color: #c4b7ff;
+            font-size: 11px;
+            background: #9272ff20;
+            border: 1px solid #9272ff35;
+            padding: 6px 10px;
+            border-radius: 8px;
+        }
+
+        .notice {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 18px 14px;
+            border-bottom: 1px solid #252c457a;
+            border-radius: 10px;
+            margin-bottom: 5px;
+        }
+
+        .notice:last-child { border-bottom: none; }
+
+        .notice.unread {
+            background: #9272ff0d;
+            border: 1px solid #9272ff40;
+        }
+
+        .notice.read { opacity: .78; }
+
+        .notice-icon {
+            width: 40px;
+            height: 40px;
+            flex-shrink: 0;
+            display: grid;
+            place-items: center;
+            border-radius: 12px;
+            background: #9272ff20;
+            color: #c4b7ff;
+            font-size: 18px;
+        }
+
+        .notice-icon.added { background: #55d6a020; color: var(--green); }
+        .notice-icon.updated { background: #55a4ff20; color: var(--blue); }
+        .notice-icon.deleted { background: #ff777720; color: #ff9999; }
+
+        .notice-content { min-width: 0; flex: 1; }
+
+        .notice-title-row {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .notice-content h3 { font-size: 13px; margin: 2px 0 6px; }
+
+        .notice-content p {
+            color: #b7bfd8;
+            font-size: 12px;
+            line-height: 1.7;
+            overflow-wrap: anywhere;
+        }
+
+        .notice-content small {
+            display: block;
+            color: var(--muted);
+            font-size: 10px;
+            margin-top: 7px;
+        }
+
+        .status {
+            font-size: 9px;
+            border-radius: 20px;
+            padding: 4px 7px;
+            font-weight: 700;
+        }
+
+        .status.unread-status {
+            background: #9272ff20;
+            color: #c4b7ff;
+        }
+
+        .status.read-status {
+            background: #55d6a015;
+            color: var(--green);
+        }
+
+        .notice-actions {
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .action-button {
+            background: #9272ff18;
+            color: #cfc4ff;
+            border: 1px solid #9272ff50;
+            border-radius: 8px;
+            padding: 8px 10px;
+            font: 500 11px 'DM Sans', sans-serif;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .action-button:hover {
+            background: #9272ff30;
+        }
+
+        .mark-all-button {
+            background: linear-gradient(100deg, #8062ff, #558cff);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 13px;
+            font: 600 11px 'DM Sans', sans-serif;
+            cursor: pointer;
+        }
+
+        .mark-all-button:hover { opacity: .9; }
+
+        .success-message {
+            background: #55d6a014;
+            border: 1px solid #55d6a050;
+            color: #75e7b7;
+            padding: 12px 15px;
+            border-radius: 9px;
+            font-size: 12px;
+            margin-bottom: 16px;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 45px 15px;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .empty-icon { font-size: 32px; margin-bottom: 12px; }
+
+        .footer {
+            text-align: center;
+            color: #66708e;
+            font-size: 10px;
+            padding: 25px 0 8px;
+        }
+
+        @media (max-width: 800px) {
+            .sidebar { width: 190px; }
+            .main { padding: 22px 17px; }
+        }
+
+        @media (max-width: 600px) {
+            .layout { display: block; }
+            .sidebar { width: 100%; padding: 15px; }
+            .brand { margin-bottom: 18px; }
+            .nav { display: grid; grid-template-columns: 1fr 1fr; }
+            .menu-label { margin-top: 12px; }
+            .main { padding: 20px 14px; }
+            .panel { padding: 16px; }
+            .topbar { align-items: flex-start; }
+            .notice { flex-wrap: wrap; }
+            .notice-actions { width: 100%; padding-left: 54px; }
+        }
+    </style>
+    <link rel="stylesheet" th:href="@{/css/unitrack-theme.css}">
+</head>
+
+<body>
+<div class="layout">
+
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">U</div>
+            <div class="brand-name">Uni<span>Track</span></div>
+        </div>
+
+        <div class="menu-label">MAIN MENU</div>
+        <nav class="nav">
+            <a href="/"><span class="nav-icon">▦</span>Dashboard</a>
+            <a href="/students"><span class="nav-icon">♙</span>Students</a>
+            <a href="/courses"><span class="nav-icon">▤</span>Courses</a>
+            <a href="/faculty"><span class="nav-icon">♧</span>Faculty Management</a>
+            <a href="/enrollments"><span class="nav-icon">▣</span>Enrollments</a>
+            <a href="/grades"><span class="nav-icon">◈</span>Grades &amp; Results</a>
+        </nav>
+
+        <div class="menu-label" style="margin-top:30px">MANAGEMENT</div>
+        <nav class="nav">
+            <a href="/analytics"><span class="nav-icon">▥</span>Analytics &amp; Reports</a>
+            <a href="/semesters"><span class="nav-icon">▦</span>Semesters</a>
+            <a href="/notifications" class="active">
+                <span class="nav-icon">♧</span>Notifications
+            </a>
+            <a href="/settings"><span class="nav-icon">⚙</span>Settings</a>
+        </nav>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div>
+                <div class="breadcrumb">Workspace / Notifications</div>
+                <h1>Notifications</h1>
+            </div>
+            <a href="/" class="back-link">← Back to Dashboard</a>
+        </header>
+
+        <section class="intro">
+            <h2>Your Notifications 🔔</h2>
+            <p>Stay informed about recent changes recorded in your UniTrack workspace. You can mark notifications as read whenever you are ready.</p>
+        </section>
+
+        <div class="success-message"
+             th:if="${successMessage}"
+             th:text="${successMessage}">
+            Notification updated successfully.
+        </div>
+
+        <section class="panel">
+            <div class="panel-header">
+                <h2>Recent Activity</h2>
+
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                    <span class="count"
+                          th:text="${notificationCount} + ' unread'">
+                        0 unread
+                    </span>
+
+                    <form th:if="${notificationCount > 0}"
+                          th:action="@{/notifications/read-all}"
+                          method="post">
+                        <button class="mark-all-button" type="submit">
+                            Mark All as Read
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div>
+                <article class="notice"
+                         th:each="notification : ${notifications}"
+                         th:classappend="${notification.readStatus ? ' read' : ' unread'}">
+
+                    <div class="notice-icon"
+                         th:classappend="${notification.activityType == 'STUDENT_ADDED' ? ' added' : (notification.activityType == 'STUDENT_UPDATED' ? ' updated' : (notification.activityType == 'STUDENT_DELETED' ? ' deleted' : ''))}">
+
+                        <span th:if="${notification.activityType == 'STUDENT_ADDED'}">＋</span>
+                        <span th:if="${notification.activityType == 'STUDENT_UPDATED'}">✎</span>
+                        <span th:if="${notification.activityType == 'STUDENT_DELETED'}">×</span>
+                        <span th:if="${notification.activityType != 'STUDENT_ADDED' and notification.activityType != 'STUDENT_UPDATED' and notification.activityType != 'STUDENT_DELETED'}">◷</span>
+                    </div>
+
+                    <div class="notice-content">
+                        <div class="notice-title-row">
+                            <h3 th:text="${notification.activityType == 'STUDENT_ADDED' ? 'Student Added' : (notification.activityType == 'STUDENT_UPDATED' ? 'Student Updated' : (notification.activityType == 'STUDENT_DELETED' ? 'Student Deleted' : 'Workspace Update'))}">
+                                Workspace Update
+                            </h3>
+
+                            <span class="status unread-status"
+                                  th:if="${!notification.readStatus}">
+                                UNREAD
+                            </span>
+
+                            <span class="status read-status"
+                                  th:if="${notification.readStatus}">
+                                READ
+                            </span>
+                        </div>
+
+                        <p th:text="${notification.description}">
+                            Activity description
+                        </p>
+
+                        <small th:text="${T(com.unitrack.activity.ActivityTime).format(notification.createdAt)}">
+                            Recently
+                        </small>
+                    </div>
+
+                    <div class="notice-actions"
+                         th:if="${!notification.readStatus}">
+                        <form th:action="@{/notifications/read/{id}(id=${notification.id})}"
+                              method="post">
+                            <button class="action-button" type="submit">
+                                ✓ Mark as Read
+                            </button>
+                        </form>
+                    </div>
+                </article>
+
+                <div th:if="${#lists.isEmpty(notifications)}" class="empty">
+                    <div class="empty-icon">♧</div>
+                    <h3>No notifications yet</h3>
+                    <p>When activity is recorded in your workspace, it will appear here.</p>
+                </div>
+            </div>
+        </section>
+
+        <footer class="footer">
+            UniTrack Academic Management System · Notifications
+        </footer>
+    </main>
+</div>
+</body>
+</html>

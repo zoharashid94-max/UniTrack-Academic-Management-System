@@ -1,0 +1,648 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics | UniTrack</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --bg: #080b18;
+            --panel: #101426;
+            --panel2: #141a30;
+            --border: #252c45;
+            --text: #f1f3ff;
+            --muted: #929bb8;
+            --purple: #9b7cff;
+            --blue: #5b9dff;
+            --green: #4adea5;
+            --orange: #ffb86b;
+            --red: #ff7892;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        a { text-decoration: none; color: inherit; }
+
+        .layout { display: flex; min-height: 100vh; }
+
+        .sidebar {
+            width: 245px;
+            flex-shrink: 0;
+            background: #0b0f20;
+            border-right: 1px solid var(--border);
+            padding: 28px 18px;
+        }
+
+        .brand {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 25px;
+            font-weight: 700;
+            margin: 0 0 8px 10px;
+            letter-spacing: -1px;
+        }
+
+        .brand span { color: var(--purple); }
+
+        .brand-sub {
+            margin: 0 0 36px 10px;
+            color: var(--muted);
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .nav-label {
+            margin: 25px 10px 12px;
+            font-size: 10px;
+            letter-spacing: 1.8px;
+            color: #69728f;
+            text-transform: uppercase;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            margin: 5px 0;
+            border-radius: 10px;
+            color: #a7afc9;
+            font-size: 13px;
+            transition: .2s;
+        }
+
+        .nav-link:hover {
+            background: var(--panel2);
+            color: white;
+        }
+
+        .nav-link.active {
+            color: white;
+            background: linear-gradient(100deg, #302653, #202345);
+            border: 1px solid #40345f;
+        }
+
+        .nav-icon { width: 22px; text-align: center; }
+
+        .main {
+            flex: 1;
+            min-width: 0;
+            padding: 35px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .eyebrow {
+            color: var(--purple);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        h1, h2, h3, p { margin-top: 0; }
+
+        h1 {
+            font: 700 30px 'Space Grotesk', sans-serif;
+            margin-bottom: 8px;
+        }
+
+        .subtitle { color: var(--muted); font-size: 13px; }
+
+        .date-pill {
+            border: 1px solid var(--border);
+            background: var(--panel);
+            border-radius: 10px;
+            padding: 12px 16px;
+            color: #c8cde0;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card, .panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+        }
+
+        .stat-card {
+            padding: 22px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::after {
+            content: "";
+            position: absolute;
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            right: -35px;
+            top: -40px;
+            background: var(--glow, #9b7cff);
+            opacity: .10;
+            filter: blur(4px);
+        }
+
+        .stat-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .stat-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            font-size: 19px;
+            background: var(--icon-bg, #282143);
+        }
+
+        .stat-label { color: var(--muted); font-size: 12px; }
+
+        .stat-value {
+            font: 700 30px 'Space Grotesk', sans-serif;
+            margin-bottom: 7px;
+        }
+
+        .stat-note { color: #7f89a8; font-size: 11px; }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+            gap: 20px;
+            margin-bottom: 22px;
+        }
+
+        .panel { padding: 24px; min-width: 0; }
+
+        .panel-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        .panel-heading h2 {
+            font: 600 17px 'Space Grotesk', sans-serif;
+            margin-bottom: 7px;
+        }
+
+        .panel-heading p { color: var(--muted); font-size: 12px; margin-bottom: 0; }
+
+        .live-label {
+            color: var(--green);
+            background: #15372f;
+            border-radius: 20px;
+            padding: 6px 10px;
+            font-size: 10px;
+            white-space: nowrap;
+        }
+
+        .chart-wrap { height: 280px; position: relative; }
+
+        .status-summary {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+        }
+
+        .dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .status-name { color: #aab2cb; font-size: 11px; }
+        .status-count { margin-left: auto; font-size: 14px; font-weight: 700; }
+
+        .table-wrap { overflow-x: auto; }
+
+        table { width: 100%; border-collapse: collapse; min-width: 560px; }
+
+        th {
+            text-align: left;
+            color: #7f89a8;
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 13px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 15px 12px;
+            border-bottom: 1px solid #20263c;
+            font-size: 12px;
+            color: #cbd1e5;
+        }
+
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background: #151a2e; }
+
+        .person { font-weight: 600; color: #f1f3ff; margin-bottom: 4px; }
+        .subtext { font-size: 10px; color: #7f89a8; }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 9px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .badge-active { color: #4adea5; background: #15372f; }
+        .badge-pending { color: #ffca7a; background: #3b2d1d; }
+        .badge-completed { color: #8cbaff; background: #1d2e4d; }
+        .badge-withdrawn { color: #ff91a5; background: #432331; }
+        .badge-default { color: #c1b5ff; background: #2b2546; }
+
+        .empty {
+            text-align: center;
+            padding: 35px 12px;
+            color: var(--muted);
+        }
+
+        .footer {
+            padding: 22px 0 0;
+            text-align: center;
+            color: #626c8b;
+            font-size: 11px;
+        }
+
+        @media (max-width: 1150px) {
+            .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .analytics-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 760px) {
+            .layout { display: block; }
+            .sidebar { width: 100%; padding: 18px; }
+            .brand-sub { margin-bottom: 18px; }
+            .nav-label { margin-top: 15px; }
+            .main { padding: 22px 16px; }
+            .topbar { align-items: flex-start; flex-direction: column; }
+            h1 { font-size: 25px; }
+            .stats { gap: 12px; }
+            .stat-card { padding: 16px; }
+            .stat-value { font-size: 25px; }
+            .panel { padding: 17px; }
+            .chart-wrap { height: 250px; }
+        }
+
+        @media (max-width: 390px) {
+            .stats { grid-template-columns: 1fr; }
+            .status-summary { grid-template-columns: 1fr; }
+        }
+    </style>
+    <link rel="stylesheet" th:href="@{/css/unitrack-theme.css}">
+</head>
+
+<body>
+<div class="layout">
+
+    <aside class="sidebar">
+        <div class="brand">Uni<span>Track</span></div>
+        <div class="brand-sub">Academic Management</div>
+
+        <div class="nav-label">Workspace</div>
+
+        <a class="nav-link" th:href="@{/dashboard}">
+            <span class="nav-icon">⌂</span> Dashboard
+        </a>
+        <a class="nav-link" th:href="@{/students}">
+            <span class="nav-icon">♙</span> Students
+        </a>
+        <a class="nav-link" th:href="@{/courses}">
+            <span class="nav-icon">▤</span> Courses
+        </a>
+        <a class="nav-link" th:href="@{/faculty}">
+            <span class="nav-icon">♧</span> Faculty Management
+        </a>
+        <a class="nav-link" th:href="@{/enrollments}">
+            <span class="nav-icon">▣</span> Enrollments
+        </a>
+        <a class="nav-link active" th:href="@{/analytics}">
+            <span class="nav-icon">▥</span> Analytics
+        </a>
+
+        <div class="nav-label">Insights</div>
+        <div class="nav-link">
+            <span class="nav-icon">◷</span> Academic Overview
+        </div>
+    </aside>
+
+    <main class="main">
+
+        <div class="topbar">
+            <div>
+                <div class="eyebrow">Reports & Insights</div>
+                <h1>Analytics Overview</h1>
+                <p class="subtitle">Explore your institution's academic data and enrollment activity.</p>
+            </div>
+            <div class="date-pill">◷ &nbsp; Academic Analytics</div>
+        </div>
+
+        <section class="stats">
+
+            <div class="stat-card" style="--glow:#9b7cff;--icon-bg:#292143;">
+                <div class="stat-top">
+                    <div class="stat-label">Total Students</div>
+                    <div class="stat-icon">♙</div>
+                </div>
+                <div class="stat-value" th:text="${totalStudents}">0</div>
+                <div class="stat-note">Students registered in the system</div>
+            </div>
+
+            <div class="stat-card" style="--glow:#5b9dff;--icon-bg:#1d2d4a;">
+                <div class="stat-top">
+                    <div class="stat-label">Total Courses</div>
+                    <div class="stat-icon">▤</div>
+                </div>
+                <div class="stat-value" th:text="${totalCourses}">0</div>
+                <div class="stat-note">Courses available in the system</div>
+            </div>
+
+            <div class="stat-card" style="--glow:#4adea5;--icon-bg:#193b34;">
+                <div class="stat-top">
+                    <div class="stat-label">Faculty Members</div>
+                    <div class="stat-icon">♧</div>
+                </div>
+                <div class="stat-value" th:text="${totalFaculty}">0</div>
+                <div class="stat-note">Faculty registered in the system</div>
+            </div>
+
+            <div class="stat-card" style="--glow:#ffb86b;--icon-bg:#3b2d1d;">
+                <div class="stat-top">
+                    <div class="stat-label">Total Enrollments</div>
+                    <div class="stat-icon">▣</div>
+                </div>
+                <div class="stat-value" th:text="${totalEnrollments}">0</div>
+                <div class="stat-note">Student course enrollment records</div>
+            </div>
+
+        </section>
+
+        <section class="analytics-grid">
+
+            <div class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h2>Enrollment Status</h2>
+                        <p>Distribution of current enrollment records</p>
+                    </div>
+                    <span class="live-label">● Live Data</span>
+                </div>
+
+                <div class="chart-wrap">
+                    <canvas id="statusChart"></canvas>
+                </div>
+
+                <div class="status-summary">
+                    <div class="status-item">
+                        <span class="dot" style="background:#4adea5;"></span>
+                        <span class="status-name">Active</span>
+                        <span class="status-count" id="activeCount">0</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="dot" style="background:#ffb86b;"></span>
+                        <span class="status-name">Pending</span>
+                        <span class="status-count" id="pendingCount">0</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="dot" style="background:#5b9dff;"></span>
+                        <span class="status-name">Completed</span>
+                        <span class="status-count" id="completedCount">0</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="dot" style="background:#ff7892;"></span>
+                        <span class="status-name">Withdrawn</span>
+                        <span class="status-count" id="withdrawnCount">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h2>Academic Snapshot</h2>
+                        <p>A quick view of your current system records</p>
+                    </div>
+                </div>
+
+                <div class="chart-wrap">
+                    <canvas id="overviewChart"></canvas>
+                </div>
+
+                <p class="subtitle" style="line-height:1.8;margin:18px 0 0;">
+                    These figures reflect records currently stored in your UniTrack database.
+                    Add or remove records through the management pages to update your analytics.
+                </p>
+            </div>
+
+        </section>
+
+        <section class="panel">
+            <div class="panel-heading">
+                <div>
+                    <h2>Recent Enrollments</h2>
+                    <p>Latest enrollment records from the database</p>
+                </div>
+                <a th:href="@{/enrollments}"
+                   style="font-size:12px;color:#b8a4ff;">
+                    Manage Enrollments →
+                </a>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Course</th>
+                        <th>Department</th>
+                        <th>Enrollment Date</th>
+                        <th>Status</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr th:each="item : ${enrollments}">
+                        <td>
+                            <div class="person"
+                                 th:text="${item.student.fullName}">Student Name</div>
+                            <div class="subtext"
+                                 th:text="${item.student.email}">student@email.com</div>
+                        </td>
+                        <td>
+                            <div class="person"
+                                 th:text="${item.course.courseName}">Course Name</div>
+                            <div class="subtext"
+                                 th:text="${item.course.courseCode}">CODE</div>
+                        </td>
+                        <td th:text="${item.course.department}">Department</td>
+                        <td th:text="${item.enrollmentDate != null ? item.enrollmentDate : 'Not set'}">
+                            Date
+                        </td>
+                        <td>
+                            <span class="badge"
+                                  th:classappend="${item.status == 'Active' ? ' badge-active' :
+                                      (item.status == 'Pending' ? ' badge-pending' :
+                                      (item.status == 'Completed' ? ' badge-completed' :
+                                      (item.status == 'Withdrawn' ? ' badge-withdrawn' : ' badge-default')))}"
+                                  th:text="${item.status}">
+                                Active
+                            </span>
+                        </td>
+                    </tr>
+
+                    <tr th:if="${#lists.isEmpty(enrollments)}">
+                        <td colspan="5" class="empty">
+                            <div style="font-size:28px;margin-bottom:10px;">▤</div>
+                            <div style="color:#f1f3ff;margin-bottom:7px;">No enrollment records yet</div>
+                            <div>Add an enrollment to see your analytics here.</div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <div class="footer">
+            UniTrack Academic Management System · Analytics Dashboard
+        </div>
+
+    </main>
+</div>
+
+<script th:inline="javascript">
+    const enrollmentRecords = /*[[${enrollments}]]*/ [];
+
+    const statusLabels = ['Active', 'Pending', 'Completed', 'Withdrawn'];
+    const statusColors = ['#4adea5', '#ffb86b', '#5b9dff', '#ff7892'];
+
+    const statusCounts = statusLabels.map(status =>
+        enrollmentRecords.filter(item => item.status === status).length
+    );
+
+    document.getElementById('activeCount').textContent = statusCounts[0];
+    document.getElementById('pendingCount').textContent = statusCounts[1];
+    document.getElementById('completedCount').textContent = statusCounts[2];
+    document.getElementById('withdrawnCount').textContent = statusCounts[3];
+
+    Chart.defaults.color = '#929bb8';
+    Chart.defaults.font.family = 'DM Sans';
+
+    new Chart(document.getElementById('statusChart'), {
+        type: 'doughnut',
+        data: {
+            labels: statusLabels,
+            datasets: [{
+                data: statusCounts,
+                backgroundColor: statusColors,
+                borderColor: '#101426',
+                borderWidth: 5,
+                hoverOffset: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '68%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 18,
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    }
+                }
+            }
+        }
+    });
+
+    new Chart(document.getElementById('overviewChart'), {
+        type: 'bar',
+        data: {
+            labels: ['Students', 'Courses', 'Faculty', 'Enrollments'],
+            datasets: [{
+                label: 'Total Records',
+                data: [
+                    Number(/*[[${totalStudents}]]*/ 0),
+                    Number(/*[[${totalCourses}]]*/ 0),
+                    Number(/*[[${totalFaculty}]]*/ 0),
+                    Number(/*[[${totalEnrollments}]]*/ 0)
+                ],
+                backgroundColor: ['#9b7cff', '#5b9dff', '#4adea5', '#ffb86b'],
+                borderRadius: 7,
+                maxBarThickness: 45
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#929bb8' },
+                    border: { display: false }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: { precision: 0, color: '#929bb8' },
+                    grid: { color: '#252c45' },
+                    border: { display: false }
+                }
+            }
+        }
+    });
+</script>
+</body>
+</html>

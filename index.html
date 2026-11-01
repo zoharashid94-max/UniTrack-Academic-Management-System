@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniTrack | Academic Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg:#080b18; --panel:#101528; --panel-light:#151b32;
+            --border:#252c45; --text:#f1f3ff; --muted:#929bb8;
+            --purple:#9272ff; --blue:#55a4ff; --green:#55d6a0;
+        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
+        button,input,select{font:inherit}
+        .app{display:flex;min-height:100vh}
+        .sidebar{width:245px;background:#0c1020;border-right:1px solid var(--border);padding:28px 17px;display:flex;flex-direction:column;flex-shrink:0}
+        .brand{display:flex;align-items:center;gap:11px;padding:0 10px;margin-bottom:40px}
+        .brand-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;background:linear-gradient(135deg,#9676ff,#4d91ff);font-size:22px;font-weight:700;box-shadow:0 5px 25px #715aff30}
+        .brand-name{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;letter-spacing:-1px}
+        .brand-name span{color:var(--purple)}
+        .menu-label{color:#6e7898;font-size:10px;letter-spacing:1.8px;font-weight:700;padding:0 12px;margin:0 0 13px}
+        .nav{display:flex;flex-direction:column;gap:6px}
+        .nav a{text-decoration:none;color:var(--muted);padding:12px 13px;border-radius:10px;display:flex;align-items:center;gap:13px;font-size:13px;transition:.2s}
+        .nav a:hover,.nav a.active{color:white;background:linear-gradient(100deg,#8062ff2a,#558cff0c)}
+        .nav a.active{border:1px solid #9272ff35}
+        .nav-icon{width:20px;text-align:center;font-size:17px}
+        .sidebar-bottom{margin-top:auto;padding:18px 10px 0}
+        .help-card{border:1px solid var(--border);border-radius:13px;padding:16px;background:linear-gradient(145deg,#17172e,#101528)}
+        .help-card strong{font-size:12px}
+        .help-card p{font-size:11px;line-height:1.7;color:var(--muted);margin:8px 0 13px}
+        .help-card a{font-size:11px;color:#b6a4ff;text-decoration:none}
+        .main{flex:1;min-width:0;padding:29px 34px}
+        .topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:35px}
+        .breadcrumb{color:var(--muted);font-size:12px;margin-bottom:7px}
+        h1,h2,h3{font-family:'Space Grotesk',sans-serif}
+        h1{font-size:clamp(23px,3vw,30px);letter-spacing:-.9px}
+        .top-actions{display:flex;align-items:center;gap:14px}
+        .search{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);width:205px;outline:none;font-size:12px}
+        .search:focus{border-color:var(--purple)}
+        .icon-button{background:var(--panel);color:white;border:1px solid var(--border);width:39px;height:39px;border-radius:11px;cursor:pointer}
+        .avatar{width:39px;height:39px;display:grid;place-items:center;border-radius:12px;background:linear-gradient(135deg,#b29aff,#658fff);color:white;font-weight:700;font-size:13px}
+        .welcome{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:25px 27px;border:1px solid #5e57a050;border-radius:17px;margin-bottom:26px;background:radial-gradient(ellipse at 85% 20%,#6556d42c,transparent 42%),linear-gradient(110deg,#171b36,#11172a)}
+        .welcome p{color:#aab3d0;font-size:13px;margin-top:9px;line-height:1.7}
+        .welcome h2{font-size:22px;letter-spacing:-.5px}
+        .welcome-art{font-size:43px;padding:0 15px;filter:drop-shadow(0 0 18px #8d78ff50)}
+        .section-heading{display:flex;justify-content:space-between;align-items:center;gap:15px;margin:29px 0 17px}
+        .section-heading h2{font-size:17px}
+        .section-heading a{color:#ac9aff;font-size:12px;text-decoration:none}
+        .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+        .stat-card{padding:19px;background:var(--panel);border:1px solid var(--border);border-radius:14px;min-width:0;transition:transform .2s,border-color .2s}
+        .stat-card:hover{transform:translateY(-3px);border-color:#5c568c}
+        .stat-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:19px}
+        .stat-icon{width:39px;height:39px;border-radius:11px;display:grid;place-items:center;font-size:18px}
+        .purple{background:#9272ff20}
+        .blue{background:#55a4ff20}
+        .green{background:#55d6a020}
+        .orange{background:#ffb76520}
+        .trend{color:var(--green);font-size:10px;font-weight:700}
+        .stat-card h3{font-size:27px;margin-bottom:5px}
+        .stat-card p{color:var(--muted);font-size:11px}
+        .content-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(260px,1fr);gap:17px}
+        .panel{background:var(--panel);border:1px solid var(--border);border-radius:15px;padding:21px;min-width:0}
+        .panel-header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:24px}
+        .panel-header h3{font-size:15px}
+        .panel-header select{background:var(--panel-light);border:1px solid var(--border);border-radius:8px;color:var(--muted);padding:7px 9px;font-size:10px}
+        .chart{height:190px;display:flex;align-items:flex-end;justify-content:space-around;gap:12px;padding:8px 0 0;border-bottom:1px solid var(--border);background:repeating-linear-gradient(to bottom,transparent 0,transparent 46px,#252c453f 47px,transparent 48px)}
+        .bar-group{height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:9px;flex:1}
+        .bar-pair{height:160px;display:flex;align-items:flex-end;gap:5px}
+        .bar{width:clamp(9px,1.7vw,19px);border-radius:5px 5px 0 0;background:linear-gradient(to top,#6c50d8,#a18aff)}
+        .bar.second{background:linear-gradient(to top,#3678d6,#66b4ff)}
+        .bar-label{color:var(--muted);font-size:10px;padding-bottom:10px}
+        .legend{display:flex;gap:17px;margin-top:17px;color:var(--muted);font-size:10px}
+        .legend span{display:flex;align-items:center;gap:7px}
+        .dot{width:8px;height:8px;border-radius:3px;background:#9272ff}
+        .dot.blue-dot{background:#55a4ff}
+        .course-list{display:flex;flex-direction:column;gap:19px}
+        .course{display:flex;align-items:center;gap:12px}
+        .course-icon{width:41px;height:41px;border-radius:11px;display:grid;place-items:center;font-size:18px;flex-shrink:0}
+        .course-info{flex:1;min-width:0}
+        .course-info strong{display:block;font-size:12px;font-weight:600;margin-bottom:5px}
+        .course-info small{color:var(--muted);font-size:10px}
+        .progress{width:75px;height:5px;border-radius:9px;background:#282f49;overflow:hidden;margin-top:7px}
+        .progress span{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,#8d6bff,#55a4ff)}
+        .course-percent{color:#c4b7ff;font-size:11px}
+        .table-wrap{overflow-x:auto}
+        table{width:100%;border-collapse:collapse;text-align:left;white-space:nowrap}
+        th{color:#7e89a8;font-size:10px;font-weight:600;padding:0 13px 14px}
+        td{border-top:1px solid #252c457a;padding:14px 13px;font-size:11px;color:#dce1f7}
+        .student-name{display:flex;align-items:center;gap:9px}
+        .student-avatar{width:29px;height:29px;display:grid;place-items:center;border-radius:9px;background:#9272ff24;color:#c7baff;font-size:10px;font-weight:700}
+        .status{display:inline-block;padding:5px 9px;border-radius:6px;font-size:10px}
+        .active-status{color:#68dfaa;background:#55d6a018}
+        .pending-status{color:#ffc77f;background:#ffb76518}
+        .bottom-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(240px,1fr);gap:17px;margin-top:17px}
+        .activity-list{display:flex;flex-direction:column}
+        .activity{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid #252c456f}
+        .activity:last-child{border-bottom:none}
+        .activity-icon{width:34px;height:34px;display:grid;place-items:center;border-radius:10px;flex-shrink:0}
+        .activity p{font-size:11px;line-height:1.6}
+        .activity small{display:block;color:var(--muted);font-size:10px;margin-top:4px}
+        .activity-description{color:#dce1f7}
+        .quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+        .quick-action{text-align:left;background:var(--panel-light);border:1px solid var(--border);border-radius:11px;color:white;padding:14px 12px;cursor:pointer;transition:.2s}
+        .quick-action:hover{border-color:var(--purple);background:#1b2040}
+        .quick-action span{display:block;font-size:19px;margin-bottom:12px}
+        .quick-action strong{display:block;font-size:11px}
+        .quick-action small{display:block;color:var(--muted);font-size:10px;margin-top:5px}
+        .empty-activity{text-align:center;color:var(--muted);padding:28px 10px;font-size:12px;line-height:1.8}
+        .empty-activity .empty-icon{font-size:28px;margin-bottom:10px;color:#ac9aff}
+        .footer{color:#66708e;font-size:10px;text-align:center;padding:27px 0 8px}
+        @media(max-width:1150px){.sidebar{width:210px}.main{padding:25px 22px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.content-grid,.bottom-grid{grid-template-columns:1fr}}
+        @media(max-width:700px){.sidebar{display:none}.main{padding:21px 15px}.topbar{align-items:flex-start;margin-bottom:24px}.search{display:none}.welcome{padding:20px}.welcome-art{font-size:30px;padding:0}.stats{gap:10px}.stat-card{padding:14px}.stat-card h3{font-size:23px}.panel{padding:16px}.chart{gap:5px}}
+    </style>
+    <link rel="stylesheet" th:href="@{/css/unitrack-theme.css}">
+</head>
+
+<body>
+<div class="app">
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">U</div>
+            <div class="brand-name">Uni<span>Track</span></div>
+        </div>
+
+        <div class="menu-label">MAIN MENU</div>
+        <nav class="nav">
+            <a href="/" class="active"><span class="nav-icon">▦</span>Dashboard</a>
+            <a href="/students"><span class="nav-icon">♙</span>Students</a>
+            <a href="/courses"><span class="nav-icon">▤</span>Courses</a>
+            <a href="/faculty"><span class="nav-icon">♧</span>Faculty Management</a>
+            <a href="/enrollments"><span class="nav-icon">▣</span>Enrollments</a>
+            <a href="/grades"><span class="nav-icon">◈</span>Grades &amp; Results</a>
+        </nav>
+
+        <div class="menu-label" style="margin-top:30px">MANAGEMENT</div>
+        <nav class="nav">
+            <a href="/analytics"><span class="nav-icon">▥</span>Analytics &amp; Reports</a>
+            <a href="/semesters"><span class="nav-icon">▦</span>Semesters</a>
+            <a href="/settings"><span class="nav-icon">⚙</span>Settings</a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <div class="help-card">
+                <strong>Need assistance?</strong>
+                <p>Manage your academic workspace with ease.</p>
+                <a href="mailto:support@unitrack.local">Contact support ↗</a>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main" id="dashboard">
+        <header class="topbar">
+            <div>
+                <div class="breadcrumb">Workspace / Overview</div>
+                <h1>Dashboard Overview</h1>
+            </div>
+            <div class="top-actions">
+                <input class="search" id="searchInput" type="search" placeholder="⌕  Search students..." aria-label="Search students">
+                <button class="icon-button" id="notificationButton" aria-label="Notifications" type="button">♧</button>
+                <div class="avatar" title="Administrator">AD</div>
+            </div>
+        </header>
+
+        <section class="welcome">
+            <div>
+                <h2>Welcome back, Administrator 👋</h2>
+                <p>Here is what's happening across your university today.<br>Your academic overview, all in one place.</p>
+            </div>
+            <div class="welcome-art">🎓</div>
+        </section>
+
+        <div class="section-heading">
+            <h2>Academic Overview</h2>
+            <a href="/analytics">View reports ↗</a>
+        </div>
+
+        <!-- Updated live database statistics -->
+        <section class="stats">
+            <article class="stat-card">
+                <div class="stat-top">
+                    <div class="stat-icon purple">♙</div>
+                    <span class="trend">Live database</span>
+                </div>
+                <h3 th:text="${totalStudents}">0</h3>
+                <p>Total Students</p>
+            </article>
+
+            <article class="stat-card">
+                <div class="stat-top">
+                    <div class="stat-icon blue">♧</div>
+                    <span class="trend">Live database</span>
+                </div>
+                <h3 th:text="${totalFaculty}">0</h3>
+                <p>Faculty Members</p>
+            </article>
+
+            <article class="stat-card">
+                <div class="stat-top">
+                    <div class="stat-icon green">▣</div>
+                    <span class="trend">Live database</span>
+                </div>
+                <h3 th:text="${totalEnrollments}">0</h3>
+                <p>Total Enrollments</p>
+            </article>
+
+            <article class="stat-card">
+                <div class="stat-top">
+                    <div class="stat-icon orange">◈</div>
+                    <span class="trend">Live database</span>
+                </div>
+                <h3 th:text="${totalResults}">0</h3>
+                <p>Total Results</p>
+            </article>
+        </section>
+
+        <section class="content-grid" id="analytics">
+            <article class="panel" style="margin-top:25px">
+                <div class="panel-header">
+                    <h3>Student Enrollment</h3>
+                    <span style="color:#929bb8;font-size:11px">Latest 6 months · Live data</span>
+                </div>
+
+                <div class="chart" id="enrollmentChart">
+                    <div class="bar-group" th:each="point : ${chartMonths}">
+                        <div class="bar-pair">
+                            <div class="bar"
+                                 th:style="|height:${totalEnrollments == 0 ? 3 : (point.total * 100.0 / totalEnrollments)}%|"
+                                 th:title="|Total enrollments: ${point.total}|"></div>
+                            <div class="bar second"
+                                 th:style="|height:${totalEnrollments == 0 ? 3 : (point.active * 100.0 / totalEnrollments)}%|"
+                                 th:title="|Active enrollments: ${point.active}|"></div>
+                        </div>
+                        <span class="bar-label" th:text="${point.label}">Jan</span>
+                    </div>
+                </div>
+
+                <div th:if="${#lists.isEmpty(chartMonths)}" class="empty-activity">
+                    Enrollment chart data is not available yet.
+                </div>
+
+                <div class="legend">
+                    <span><i class="dot"></i> Total enrollments</span>
+                    <span><i class="dot blue-dot"></i> Active enrollments</span>
+                </div>
+            </article>
+
+            <article class="panel" style="margin-top:25px" id="courses">
+                <div class="panel-header">
+                    <h3>Popular Courses</h3>
+                    <a href="/courses" style="color:#ac9aff;font-size:11px;text-decoration:none">View all</a>
+                </div>
+
+                <div class="course-list">
+                    <div class="course" th:each="course, stat : ${courses}">
+                        <div class="course-icon"
+                             th:classappend="${stat.index % 4 == 0 ? ' purple' : (stat.index % 4 == 1 ? ' blue' : (stat.index % 4 == 2 ? ' green' : ' orange'))}">
+                            <span th:text="${stat.index % 4 == 0 ? '⌘' : (stat.index % 4 == 1 ? '∑' : (stat.index % 4 == 2 ? '⌬' : '◉'))}">⌘</span>
+                        </div>
+
+                        <div class="course-info">
+                            <strong th:text="${course.courseName}">Course Name</strong>
+                            <small th:text="${course.courseCode + ' · ' + course.department}">Course Code · Department</small>
+                            <div class="progress">
+                                <span style="width:100%"></span>
+                            </div>
+                        </div>
+
+                        <span class="course-percent" th:text="${course.creditHours + ' Cr'}">3 Cr</span>
+                    </div>
+
+                    <div th:if="${#lists.isEmpty(courses)}" class="empty-activity">
+                        Abhi koi course add nahi hua.
+                    </div>
+                </div>
+            </article>
+        </section>
+
+        <section class="bottom-grid">
+            <article class="panel" id="students">
+                <div class="panel-header">
+                    <h3>Recent Student Records</h3>
+                    <a href="/students" style="color:#ac9aff;font-size:11px;text-decoration:none">View all</a>
+                </div>
+
+                <div class="table-wrap">
+                    <table id="studentTable">
+                        <thead>
+                        <tr><th>STUDENT</th><th>STUDENT ID</th><th>PROGRAM</th><th>STATUS</th></tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="student : ${recentStudents}">
+                            <td>
+                                <div class="student-name">
+                                    <div class="student-avatar"
+                                         th:text="${#strings.length(student.fullName) >= 2 ? #strings.substring(student.fullName, 0, 2).toUpperCase() : student.fullName.toUpperCase()}">ST</div>
+                                    <span th:text="${student.fullName}">Student Name</span>
+                                </div>
+                            </td>
+                            <td th:text="${'UT-' + student.id}">UT-1</td>
+                            <td th:text="${student.department}">Department</td>
+                            <td><span class="status active-status">Active</span></td>
+                        </tr>
+
+                        <tr th:if="${#lists.isEmpty(recentStudents)}">
+                            <td colspan="4" style="text-align:center;color:#929bb8;">No student records found. Add your first student!</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+
+            <article class="panel">
+                <div class="panel-header"><h3>Quick Actions</h3></div>
+                <div class="quick-actions">
+                    <button class="quick-action" data-action="student" type="button"><span>♙</span><strong>Add Student</strong><small>Register a student</small></button>
+                    <button class="quick-action" data-action="course" type="button"><span>▤</span><strong>Add Course</strong><small>Create a course</small></button>
+                    <button class="quick-action" data-action="grades" type="button"><span>◈</span><strong>Enter Grades</strong><small>Manage results</small></button>
+                    <button class="quick-action" data-action="report" type="button"><span>▥</span><strong>View Reports</strong><small>Academic insights</small></button>
+                </div>
+            </article>
+        </section>
+
+        <section class="panel" style="margin-top:17px" id="activity">
+            <div class="panel-header">
+                <h3>Recent Activity</h3>
+                <span style="color:#929bb8;font-size:11px"
+                      th:text="${#lists.size(recentActivities)} + ' activities'">0 activities</span>
+            </div>
+
+            <div class="activity-list">
+                <div class="activity" th:each="activity : ${recentActivities}">
+                    <div class="activity-icon"
+                         th:classappend="${activity.activityType == 'STUDENT_ADDED' ? ' green' : (activity.activityType == 'STUDENT_UPDATED' ? ' blue' : ' purple')}">
+                        <span th:if="${activity.activityType == 'STUDENT_ADDED'}">＋</span>
+                        <span th:if="${activity.activityType == 'STUDENT_UPDATED'}">✎</span>
+                        <span th:if="${activity.activityType == 'STUDENT_DELETED'}">×</span>
+                    </div>
+
+                    <div>
+                        <p>
+                            <strong th:text="${activity.activityType == 'STUDENT_ADDED' ? 'Student Added' : (activity.activityType == 'STUDENT_UPDATED' ? 'Student Updated' : (activity.activityType == 'STUDENT_DELETED' ? 'Student Deleted' : 'Activity'))}">
+                                Student Activity
+                            </strong>
+                            <span class="activity-description" th:text="${activity.description}">Activity description</span>
+                        </p>
+                        <small th:text="${T(com.unitrack.activity.ActivityTime).format(activity.createdAt)}">Just now</small>
+                    </div>
+                </div>
+
+                <div th:if="${#lists.isEmpty(recentActivities)}" class="empty-activity">
+                    <div class="empty-icon">◷</div>
+                    <p>No activity yet.</p>
+                    <p>Add, edit or delete a student to see recent activity here.</p>
+                </div>
+            </div>
+        </section>
+
+        <footer class="footer">UniTrack Academic Management System · Academic workspace</footer>
+    </main>
+</div>
+
+<script>
+    const searchInput = document.getElementById('searchInput');
+
+    searchInput.addEventListener('input', function () {
+        const query = this.value.toLowerCase().trim();
+
+        document.querySelectorAll('#studentTable tbody tr').forEach(function (row) {
+            if (row.querySelector('td[colspan]')) return;
+            row.style.display = row.textContent.toLowerCase().includes(query) ? '' : 'none';
+        });
+    });
+
+    document.querySelectorAll('.quick-action').forEach(function (button) {
+        button.addEventListener('click', function () {
+            const routes = {
+                student: '/students',
+                course: '/courses',
+                grades: '/grades',
+                report: '/analytics'
+            };
+
+            const destination = routes[this.dataset.action];
+            if (destination) window.location.href = destination;
+        });
+    });
+
+    document.getElementById('notificationButton').addEventListener('click', function () {
+        window.location.href = '/notifications';
+    });
+
+    // Enrollment chart bars are rendered from live database values by Thymeleaf.
+    // No hardcoded demo data is used.
+</script>
+</body>
+</html>

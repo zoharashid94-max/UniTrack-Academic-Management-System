@@ -1,0 +1,374 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Faculty | UniTrack</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+          rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #080b18;
+            color: #f1f5f9;
+            min-height: 100vh;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 245px;
+            background: #0d1122;
+            border-right: 1px solid #202640;
+            padding: 30px 18px;
+            flex-shrink: 0;
+        }
+
+        .brand {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 25px;
+            font-weight: 700;
+            margin: 0 0 8px 10px;
+            color: #a78bfa;
+        }
+
+        .brand-subtitle {
+            color: #7f8aa8;
+            font-size: 12px;
+            margin: 0 0 35px 10px;
+        }
+
+        .nav-label {
+            color: #68738f;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            margin: 25px 10px 12px;
+            text-transform: uppercase;
+        }
+
+        .nav-link {
+            display: block;
+            color: #a6b0c9;
+            text-decoration: none;
+            padding: 12px 14px;
+            margin: 5px 0;
+            border-radius: 9px;
+            font-size: 14px;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: #ffffff;
+            background: #252448;
+        }
+
+        .nav-link.active {
+            border-left: 3px solid #a78bfa;
+        }
+
+        .main {
+            flex: 1;
+            padding: 35px;
+            min-width: 0;
+        }
+
+        .eyebrow {
+            color: #a78bfa;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        h1, h2 {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        h1 {
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #929db8;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .panel {
+            max-width: 760px;
+            margin-top: 28px;
+            background: #101528;
+            border: 1px solid #252b45;
+            border-radius: 14px;
+            padding: 28px;
+        }
+
+        .panel-heading {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+
+        .panel-description {
+            color: #8792ad;
+            font-size: 13px;
+            line-height: 1.6;
+            margin-bottom: 26px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 4px;
+        }
+
+        label {
+            display: block;
+            color: #c5cce0;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        input, select {
+            width: 100%;
+            background: #090e1e;
+            color: #f1f5f9;
+            border: 1px solid #303752;
+            border-radius: 8px;
+            padding: 13px;
+            font-family: inherit;
+            font-size: 13px;
+            outline: none;
+        }
+
+        input:focus, select:focus {
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 2px #8b5cf622;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 28px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 18px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 700;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .save-btn {
+            background: #7c3aed;
+            color: #ffffff;
+            border: 1px solid #7c3aed;
+        }
+
+        .save-btn:hover {
+            background: #8b5cf6;
+        }
+
+        .cancel-btn {
+            background: #191f34;
+            color: #c5cce0;
+            border: 1px solid #303752;
+        }
+
+        .cancel-btn:hover {
+            background: #252b45;
+        }
+
+        .alert {
+            padding: 13px 16px;
+            border-radius: 9px;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .error {
+            color: #fca5a5;
+            background: #351a25;
+            border: 1px solid #713044;
+        }
+
+        @media (max-width: 700px) {
+            .sidebar {
+                width: 75px;
+                padding: 22px 8px;
+            }
+
+            .brand {
+                font-size: 17px;
+                margin-left: 4px;
+            }
+
+            .brand-subtitle, .nav-label {
+                display: none;
+            }
+
+            .nav-link {
+                font-size: 0;
+                text-align: center;
+                padding: 14px 4px;
+            }
+
+            .nav-link::first-letter {
+                font-size: 15px;
+            }
+
+            .main {
+                padding: 22px 14px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .panel {
+                padding: 20px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 17px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" th:href="@{/css/unitrack-theme.css}">
+</head>
+
+<body>
+<div class="layout">
+
+    <aside class="sidebar">
+        <div class="brand">UniTrack.</div>
+        <div class="brand-subtitle">Academic Management System</div>
+
+        <div class="nav-label">Workspace</div>
+        <a class="nav-link" th:href="@{/}">▦ &nbsp; Dashboard</a>
+        <a class="nav-link" th:href="@{/students}">♙ &nbsp; Students</a>
+        <a class="nav-link" th:href="@{/courses}">▤ &nbsp; Courses</a>
+        <a class="nav-link active" th:href="@{/faculty}">♧ &nbsp; Faculty</a>
+
+        <div class="nav-label">Academic</div>
+        <a class="nav-link" th:href="@{/}">▣ &nbsp; Enrollments</a>
+        <a class="nav-link" th:href="@{/}">▥ &nbsp; Analytics</a>
+    </aside>
+
+    <main class="main">
+        <div class="eyebrow">Academic Administration</div>
+        <h1>Edit Faculty Member</h1>
+        <p class="subtitle">
+            Update the faculty member's information and save your changes.
+        </p>
+
+        <div th:if="${errorMessage}"
+             class="alert error"
+             th:text="${errorMessage}"></div>
+
+        <section class="panel">
+            <h2 class="panel-heading">Faculty Information</h2>
+            <p class="panel-description">
+                Edit the details below. Your changes will be saved to the faculty directory.
+            </p>
+
+            <form th:action="@{/faculty/update/{id}(id=${faculty.id})}"
+                  th:object="${faculty}"
+                  method="post">
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="fullName">Full Name</label>
+                        <input id="fullName"
+                               type="text"
+                               th:field="*{fullName}"
+                               placeholder="Enter full name"
+                               required
+                               maxlength="100">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input id="email"
+                               type="email"
+                               th:field="*{email}"
+                               placeholder="name@example.com"
+                               required
+                               maxlength="150">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="department">Department</label>
+                        <select id="department"
+                                th:field="*{department}"
+                                required>
+                            <option value="">Select department</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Software Engineering">Software Engineering</option>
+                            <option value="Information Technology">Information Technology</option>
+                            <option value="Artificial Intelligence">Artificial Intelligence</option>
+                            <option value="Data Science">Data Science</option>
+                            <option value="Mathematics">Mathematics</option>
+                            <option value="Physics">Physics</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="designation">Designation</label>
+                        <select id="designation"
+                                th:field="*{designation}"
+                                required>
+                            <option value="">Select designation</option>
+                            <option value="Professor">Professor</option>
+                            <option value="Associate Professor">Associate Professor</option>
+                            <option value="Assistant Professor">Assistant Professor</option>
+                            <option value="Lecturer">Lecturer</option>
+                            <option value="Visiting Faculty">Visiting Faculty</option>
+                            <option value="Instructor">Instructor</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <button type="submit" class="btn save-btn">
+                        Save Changes
+                    </button>
+
+                    <a th:href="@{/faculty}" class="btn cancel-btn">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </section>
+    </main>
+</div>
+</body>
+</html>

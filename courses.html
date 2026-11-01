@@ -1,0 +1,461 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Courses | UniTrack</title>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #080b18;
+            color: #f4f5ff;
+            padding: 30px;
+        }
+
+        .container { max-width: 1200px; margin: auto; }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 28px;
+        }
+
+        h1 { margin: 0 0 8px; font-size: 30px; }
+        .subtitle { color: #a7aec8; margin: 0; }
+
+        .back-link {
+            text-decoration: none;
+            color: #fff;
+            background: #252b46;
+            padding: 11px 16px;
+            border-radius: 9px;
+        }
+
+        .panel {
+            background: #11162a;
+            border: 1px solid #252b46;
+            border-radius: 15px;
+            padding: 24px;
+            margin-bottom: 25px;
+        }
+
+        h2 { margin: 0 0 22px; font-size: 20px; }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .field { display: flex; flex-direction: column; gap: 8px; }
+        label { color: #cbd0e6; font-size: 14px; }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #303957;
+            border-radius: 8px;
+            background: #0b1020;
+            color: #f4f5ff;
+            outline: none;
+        }
+
+        input:focus, select:focus { border-color: #8b5cf6; }
+
+        button {
+            border: none;
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .primary-btn {
+            margin-top: 20px;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #7c3aed, #4f46e5);
+        }
+
+        .table-wrapper { overflow-x: auto; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 750px;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 15px 12px;
+            border-bottom: 1px solid #252b46;
+        }
+
+        th {
+            color: #aeb7d5;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
+
+        td { font-size: 14px; }
+        tbody tr:hover { background: #171d35; }
+
+        .edit-btn {
+            background: #4338ca;
+            text-decoration: none;
+            color: white;
+            display: inline-block;
+            padding: 9px 12px;
+            border-radius: 7px;
+            margin-right: 5px;
+        }
+
+        .delete-btn { background: #b91c1c; }
+
+        .alert {
+            padding: 13px 16px;
+            border-radius: 9px;
+            margin-bottom: 20px;
+        }
+
+        .success {
+            background: #123b30;
+            border: 1px solid #21634e;
+            color: #a7f3d0;
+        }
+
+        .error {
+            background: #431d2a;
+            border: 1px solid #7f2940;
+            color: #fecdd3;
+        }
+
+        .empty {
+            text-align: center;
+            color: #a7aec8;
+            padding: 30px;
+        }
+
+        .actions { white-space: nowrap; }
+
+        .course-summary {
+            color: #a7aec8;
+            font-size: 14px;
+            margin: -8px 0 20px;
+        }
+
+        .filter-form {
+            display: grid;
+            grid-template-columns: minmax(200px, 2fr) minmax(180px, 1fr) auto auto;
+            gap: 12px;
+            align-items: end;
+            margin-bottom: 22px;
+        }
+
+        .filter-field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-btn, .reset-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 42px;
+            padding: 11px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            white-space: nowrap;
+            font-weight: 600;
+        }
+
+        .filter-btn {
+            background: linear-gradient(135deg, #7c3aed, #4f46e5);
+            color: white;
+        }
+
+        .reset-btn {
+            background: #252b46;
+            color: #e4e7f5;
+        }
+
+        .pagination {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            align-items: center;
+            margin-top: 22px;
+        }
+
+        .page-link {
+            display: inline-block;
+            padding: 9px 13px;
+            color: #e4e7f5;
+            background: #1a2038;
+            border: 1px solid #303957;
+            border-radius: 7px;
+            text-decoration: none;
+        }
+
+        .page-link.active {
+            background: #6d28d9;
+            border-color: #8b5cf6;
+            color: white;
+        }
+
+        .page-link.disabled {
+            opacity: .4;
+            pointer-events: none;
+        }
+
+        @media (max-width: 800px) {
+            body { padding: 18px; }
+            .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .panel { padding: 18px; }
+            .filter-form { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 520px) {
+            .form-grid, .filter-form { grid-template-columns: 1fr; }
+            h1 { font-size: 25px; }
+        }
+    </style>
+    <link rel="stylesheet" th:href="@{/css/unitrack-theme.css}">
+</head>
+
+<body>
+<div class="container">
+
+    <header class="topbar">
+        <div>
+            <h1>Courses</h1>
+            <p class="subtitle">Manage university courses and academic details.</p>
+        </div>
+        <a class="back-link" th:href="@{/}">← Dashboard</a>
+    </header>
+
+    <div th:if="${successMessage}" class="alert success"
+         th:text="${successMessage}"></div>
+
+    <div th:if="${errorMessage}" class="alert error"
+         th:text="${errorMessage}"></div>
+
+    <section class="panel">
+        <h2>Add New Course</h2>
+
+        <form th:action="@{/courses/add}" method="post">
+            <div class="form-grid">
+
+                <div class="field">
+                    <label for="courseName">Course Name</label>
+                    <input id="courseName" name="courseName"
+                           type="text" placeholder="e.g. Database Systems" required>
+                </div>
+
+                <div class="field">
+                    <label for="courseCode">Course Code</label>
+                    <input id="courseCode" name="courseCode"
+                           type="text" placeholder="e.g. CS301" required>
+                </div>
+
+                <div class="field">
+                    <label for="department">Department</label>
+                    <select id="department" name="department" required>
+                        <option value="">Select department</option>
+                        <option value="Computer Science">Computer Science</option>
+                        <option value="Software Engineering">Software Engineering</option>
+                        <option value="Information Technology">Information Technology</option>
+                        <option value="Artificial Intelligence">Artificial Intelligence</option>
+                        <option value="Data Science">Data Science</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="creditHours">Credit Hours</label>
+                    <select id="creditHours" name="creditHours" required>
+                        <option value="">Select credit hours</option>
+                        <option value="1">1 Credit Hour</option>
+                        <option value="2">2 Credit Hours</option>
+                        <option value="3">3 Credit Hours</option>
+                        <option value="4">4 Credit Hours</option>
+                        <option value="5">5 Credit Hours</option>
+                        <option value="6">6 Credit Hours</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="semester">Semester</label>
+                    <select id="semester" name="semester" required>
+                        <option value="">Select semester</option>
+                        <option value="Semester 1">Semester 1</option>
+                        <option value="Semester 2">Semester 2</option>
+                        <option value="Semester 3">Semester 3</option>
+                        <option value="Semester 4">Semester 4</option>
+                        <option value="Semester 5">Semester 5</option>
+                        <option value="Semester 6">Semester 6</option>
+                        <option value="Semester 7">Semester 7</option>
+                        <option value="Semester 8">Semester 8</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <button type="submit" class="primary-btn">+ Add Course</button>
+        </form>
+    </section>
+
+    <section class="panel" id="course-results">
+        <h2>All Courses</h2>
+
+        <p class="course-summary">
+            Total matching courses:
+            <strong th:text="${totalCourses}">0</strong>
+        </p>
+
+        <form th:action="@{/courses}" method="get"
+              class="filter-form" id="course-filters">
+
+            <div class="filter-field">
+                <label for="keyword">Search courses</label>
+                <input id="keyword" type="search" name="keyword"
+                       placeholder="Name, code, department or semester"
+                       th:value="${keyword}">
+            </div>
+
+            <div class="filter-field">
+                <label for="departmentFilter">Filter by department</label>
+                <select id="departmentFilter" name="department">
+                    <option value="">All Departments</option>
+                    <option value="Computer Science"
+                            th:selected="${selectedDepartment == 'Computer Science'}">
+                        Computer Science
+                    </option>
+                    <option value="Software Engineering"
+                            th:selected="${selectedDepartment == 'Software Engineering'}">
+                        Software Engineering
+                    </option>
+                    <option value="Information Technology"
+                            th:selected="${selectedDepartment == 'Information Technology'}">
+                        Information Technology
+                    </option>
+                    <option value="Artificial Intelligence"
+                            th:selected="${selectedDepartment == 'Artificial Intelligence'}">
+                        Artificial Intelligence
+                    </option>
+                    <option value="Data Science"
+                            th:selected="${selectedDepartment == 'Data Science'}">
+                        Data Science
+                    </option>
+                </select>
+            </div>
+
+            <button type="submit" class="filter-btn">Search / Filter</button>
+            <a th:href="@{/courses#course-results}" class="reset-btn">Reset</a>
+        </form>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Course Name</th>
+                    <th>Course Code</th>
+                    <th>Department</th>
+                    <th>Credit Hours</th>
+                    <th>Semester</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="course : ${courses}">
+                    <td th:text="${course.id}"></td>
+                    <td th:text="${course.courseName}"></td>
+                    <td th:text="${course.courseCode}"></td>
+                    <td th:text="${course.department}"></td>
+                    <td th:text="${course.creditHours}"></td>
+                    <td th:text="${course.semester}"></td>
+                    <td class="actions">
+                        <a class="edit-btn"
+                           th:href="@{/courses/edit/{id}(id=${course.id})}">
+                            Edit
+                        </a>
+
+                        <form th:action="@{/courses/delete/{id}(id=${course.id})}"
+                              method="post" style="display:inline"
+                              onsubmit="return confirm('Are you sure you want to delete this course?');">
+                            <button class="delete-btn" type="submit">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+
+                <tr th:if="${#lists.isEmpty(courses)}">
+                    <td colspan="7" class="empty">
+                        No matching courses found. Try changing your search or filter,
+                        or add a new course using the form above.
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <nav class="pagination" th:if="${totalPages > 1}"
+             aria-label="Course pages">
+
+            <a class="page-link"
+               th:classappend="${currentPage == 0} ? ' disabled' : ''"
+               th:href="@{/courses(page=${currentPage - 1}, keyword=${keyword}, department=${selectedDepartment}) + '#course-results'}">
+                Previous
+            </a>
+
+            <a class="page-link"
+               th:each="pageNumber : ${#numbers.sequence(0, totalPages - 1)}"
+               th:text="${pageNumber + 1}"
+               th:classappend="${pageNumber == currentPage} ? ' active' : ''"
+               th:href="@{/courses(page=${pageNumber}, keyword=${keyword}, department=${selectedDepartment}) + '#course-results'}">
+            </a>
+
+            <a class="page-link"
+               th:classappend="${currentPage >= totalPages - 1} ? ' disabled' : ''"
+               th:href="@{/courses(page=${currentPage + 1}, keyword=${keyword}, department=${selectedDepartment}) + '#course-results'}">
+                Next
+            </a>
+        </nav>
+    </section>
+
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const params = new URLSearchParams(window.location.search);
+        const filters = document.getElementById("course-filters");
+        const keywordInput = document.getElementById("keyword");
+
+        if (filters && (params.has("keyword") || params.has("department")
+                || params.has("page"))) {
+            filters.scrollIntoView({
+                behavior: "auto",
+                block: "center"
+            });
+
+            if (keywordInput && keywordInput.value.trim() !== "") {
+                keywordInput.focus({ preventScroll: true });
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
+
