@@ -1,4 +1,3 @@
-
 package com.unitrack.course;
 
 import org.springframework.data.domain.Page;
