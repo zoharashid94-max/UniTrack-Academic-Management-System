@@ -1,4 +1,3 @@
-
 package com.unitrack.semester;
 
 import jakarta.persistence.Entity;
