@@ -1,4 +1,3 @@
-
 package com.unitrack.faculty;
 
 import org.springframework.stereotype.Controller;
